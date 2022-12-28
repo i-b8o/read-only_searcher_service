@@ -44,6 +44,8 @@ github.com/i-b8o/logging v0.0.0-20221105180025-715df517e91e h1:79fUA9ESQwOOydQ1t
 github.com/i-b8o/logging v0.0.0-20221105180025-715df517e91e/go.mod h1:1yilJB+QuSWKvpRPTck8bq2jwPmOklJrqkKR5/q3EGg=
 github.com/i-b8o/read-only_contracts v0.0.0-20221228125811-2bfc2a353fb0 h1:STmsFsB1vH1VMHUf1qcT22+Dk3ZMgXiB9AOTe0PK2pE=
 github.com/i-b8o/read-only_contracts v0.0.0-20221228125811-2bfc2a353fb0/go.mod h1:+xArhQldMdQb+B4l1IFwRUmJNoTT1zJ4cx9vI765Qcc=
+github.com/i-b8o/read-only_contracts v0.0.0-20221228165221-5aa6e74f4b27 h1:XoqUKegjzHHlDRBfP43oX5EXDObhOLdvVb10gDQ092g=
+github.com/i-b8o/read-only_contracts v0.0.0-20221228165221-5aa6e74f4b27/go.mod h1:+xArhQldMdQb+B4l1IFwRUmJNoTT1zJ4cx9vI765Qcc=
 github.com/ilyakaznacheev/cleanenv v1.4.2 h1:nRqiriLMAC7tz7GzjzUTBHfzdzw6SQ7XvTagkFqe/zU=
 github.com/ilyakaznacheev/cleanenv v1.4.2/go.mod h1:i0owW+HDxeGKE0/JPREJOdSCPIyOnmh6C0xhWAkF/xA=
 github.com/jackc/chunkreader v1.0.0/go.mod h1:RT6O25fNZIuasFJRyZ4R/Y2BbhasbmZXF9QQ7T3kePo=
