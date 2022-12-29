@@ -17,9 +17,9 @@ func NewDocStorage(client client.PostgreSQLClient) *docStorage {
 	return &docStorage{client: client}
 }
 
-func (s *docStorage) Docs(ctx context.Context, searchQuery string) ([]pb.SearchResponse, error) {
+func (s *docStorage) Docs(ctx context.Context, searchQuery string) ([]*pb.SearchResponse, error) {
 	sql := `SELECT id, name, title, updated_at, count(*) OVER() AS full_count from doc WHERE ts @@ phraseto_tsquery('russian',$1)`
-	var searchResults []pb.SearchResponse
+	var searchResults []*pb.SearchResponse
 	rows, err := s.client.Query(ctx, sql, searchQuery)
 	if err != nil {
 		return nil, err
@@ -28,7 +28,7 @@ func (s *docStorage) Docs(ctx context.Context, searchQuery string) ([]pb.SearchR
 	defer rows.Close()
 
 	for rows.Next() {
-		search := pb.SearchResponse{}
+		search := &pb.SearchResponse{}
 		if err = rows.Scan(
 			&search.DocID, &search.DocName, &search.Text, &search.UpdatedAt, &search.Count,
 		); err != nil {
@@ -41,15 +41,15 @@ func (s *docStorage) Docs(ctx context.Context, searchQuery string) ([]pb.SearchR
 	return searchResults, nil
 }
 
-func (s *docStorage) DocsWithOffset(ctx context.Context, searchQuery, offset, limit string) ([]pb.SearchResponse, error) {
+func (s *docStorage) DocsWithOffset(ctx context.Context, searchQuery string, offset, limit uint32) ([]*pb.SearchResponse, error) {
 	sql := `SELECT id, name, title, updated_at, count(*) OVER() AS full_count from doc WHERE ts @@ phraseto_tsquery('russian',$1)`
 	// Pagination
 	// sql += fmt.Sprintf(` AND (updated_at, id) > ('%s' :: TIMESTAMPTZ, '%s') ORDER BY updated_at, id LIMIT %s`, params[0], params[1], params[2])
-	sql += fmt.Sprintf(` OFFSET %s LIMIT %s`, offset, limit)
+	sql += fmt.Sprintf(` OFFSET %d LIMIT %d`, offset, limit)
 	//  else if len(params) == 1 { // First page
 	// 	sql += fmt.Sprintf(` LIMIT %s`, params[0])
 	// }
-	var searchResults []pb.SearchResponse
+	var searchResults []*pb.SearchResponse
 	rows, err := s.client.Query(ctx, sql, searchQuery)
 	if err != nil {
 		return nil, err
@@ -58,7 +58,7 @@ func (s *docStorage) DocsWithOffset(ctx context.Context, searchQuery, offset, li
 	defer rows.Close()
 
 	for rows.Next() {
-		search := pb.SearchResponse{}
+		search := &pb.SearchResponse{}
 		if err = rows.Scan(
 			&search.DocID, &search.DocName, &search.Text, &search.UpdatedAt, &search.Count,
 		); err != nil {

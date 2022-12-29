@@ -4,20 +4,15 @@ import (
 	"context"
 	"fmt"
 	"net"
-	"read-only_reader_service/internal/config"
-	chapter_controller "read-only_reader_service/internal/controller/v1/chapter"
-	doc_controller "read-only_reader_service/internal/controller/v1/doc"
-	paragraph_controller "read-only_reader_service/internal/controller/v1/paragraph"
-	postgressql "read-only_reader_service/internal/data_providers/db/postgresql"
-	service "read-only_reader_service/internal/domain/service"
-	chapter_usecase "read-only_reader_service/internal/domain/usecase/chapter"
-	doc_usecase "read-only_reader_service/internal/domain/usecase/doc"
-	paragraph_usecase "read-only_reader_service/internal/domain/usecase/paragraph"
+	"read-only_search/internal/config"
+	"read-only_search/internal/controller/v1"
+	postgressql "read-only_search/internal/data_providers/db/postgresql"
+	"read-only_search/internal/domen/service"
+	"read-only_search/pkg/client/postgresql"
 
-	"read-only_reader_service/pkg/client/postgresql"
 	"time"
 
-	pb "github.com/i-b8o/read-only_contracts/pb/reader/v1"
+	pb "github.com/i-b8o/read-only_contracts/pb/searcher/v1"
 
 	"github.com/i-b8o/logging"
 	"google.golang.org/grpc"
@@ -42,21 +37,17 @@ func NewApp(ctx context.Context, config *config.Config) (App, error) {
 	if err != nil {
 		logger.Fatal(err)
 	}
-	regAdapter := postgressql.NewDocStorage(pgClient)
+	docAdapter := postgressql.NewDocStorage(pgClient)
 	chapterAdapter := postgressql.NewChapterStorage(pgClient)
 	paragraphAdapter := postgressql.NewParagraphStorage(pgClient)
+	generalAdapter := postgressql.NewParagraphStorage(pgClient)
 
-	docService := service.NewDocService(regAdapter)
+	docService := service.NewDocService(docAdapter)
 	chapterService := service.NewChapterService(chapterAdapter)
-	paragraphService := service.NewParagraphService(paragraphAdapter)
+	paragraphService := service.NewParagraphsService(paragraphAdapter)
+	generalService := service.NewGeneralService(generalAdapter)
 
-	docUsecase := doc_usecase.NewDocUsecase(docService)
-	chapterUsecase := chapter_usecase.NewChapterUsecase(chapterService, paragraphService)
-	paragraphUsecase := paragraph_usecase.NewParagraphUsecase(paragraphService)
-
-	docController := doc_controller.NewDocGRPCService(docUsecase)
-	chapterController := chapter_controller.NewChapterGRPCService(chapterUsecase)
-	paragraphController := paragraph_controller.NewParagraphGRPCService(paragraphUsecase)
+	controller := controller.NewDocGRPCService(docService, chapterService, paragraphService, generalService)
 	// read ca's cert, verify to client's certificate
 	// homeDir, err := os.UserHomeDir()
 	// if err != nil {
@@ -93,9 +84,7 @@ func NewApp(ctx context.Context, config *config.Config) (App, error) {
 	// pb.RegisterReadOnlyDocGRPCServer(grpcServer, docGrpcService)
 	logger.Print("grpc server initializing")
 	grpcServer := grpc.NewServer()
-	pb.RegisterDocGRPCServer(grpcServer, docController)
-	pb.RegisterChapterGRPCServer(grpcServer, chapterController)
-	pb.RegisterParagraphGRPCServer(grpcServer, paragraphController)
+	pb.RegisterSearcherGRPCServer(grpcServer, controller)
 
 	return App{cfg: config, grpcServer: grpcServer, logger: logger}, nil
 }

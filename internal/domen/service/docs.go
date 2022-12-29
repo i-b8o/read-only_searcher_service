@@ -7,8 +7,8 @@ import (
 )
 
 type DocStorage interface {
-	Docs(ctx context.Context, searchQuery string) ([]pb.SearchResponse, error)
-	DocsWithOffset(ctx context.Context, searchQuery, offset, limit string) ([]pb.SearchResponse, error)
+	Docs(ctx context.Context, searchQuery string) ([]*pb.SearchResponse, error)
+	DocsWithOffset(ctx context.Context, searchQuery string, offset, limit uint32) ([]*pb.SearchResponse, error)
 }
 
 type docService struct {
@@ -19,7 +19,7 @@ func NewDocService(storage DocStorage) *docService {
 	return &docService{storage: storage}
 }
 
-func (s docService) DocsSearch(ctx context.Context, searchQuery string, params ...string) ([]pb.SearchResponse, error) {
+func (s docService) Search(ctx context.Context, searchQuery string, params ...uint32) ([]*pb.SearchResponse, error) {
 	if len(params) == 2 {
 		return s.storage.DocsWithOffset(ctx, searchQuery, params[0], params[1])
 	}

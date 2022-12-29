@@ -16,9 +16,9 @@ func NewChapterStorage(client client.PostgreSQLClient) *chapterStorage {
 	return &chapterStorage{client: client}
 }
 
-func (ss *chapterStorage) Chapters(ctx context.Context, searchQuery string) ([]pb.SearchResponse, error) {
-	sql := `SELECT c.id, c.name, r.name, c.updated_at, count(*) OVER() AS full_count from chapter AS c INNER JOIN doc as r ON c.r_id = r.id WHERE c.ts @@ phraseto_tsquery('russian',$1)`
-	var searchResults []pb.SearchResponse
+func (ss *chapterStorage) Chapters(ctx context.Context, searchQuery string) ([]*pb.SearchResponse, error) {
+	sql := `SELECT c.id, c.name, d.name, c.updated_at, count(*) OVER() AS full_count from chapter AS c INNER JOIN doc as d ON c.r_id = d.id WHERE c.ts @@ phraseto_tsquery('russian',$1)`
+	var searchResults []*pb.SearchResponse
 	rows, err := ss.client.Query(ctx, sql, searchQuery)
 	if err != nil {
 		return nil, err
@@ -27,7 +27,7 @@ func (ss *chapterStorage) Chapters(ctx context.Context, searchQuery string) ([]p
 	defer rows.Close()
 
 	for rows.Next() {
-		search := pb.SearchResponse{}
+		search := &pb.SearchResponse{}
 		if err = rows.Scan(
 			&search.ChapterID, &search.Text, &search.DocName, &search.UpdatedAt, &search.Count,
 		); err != nil {
@@ -40,17 +40,16 @@ func (ss *chapterStorage) Chapters(ctx context.Context, searchQuery string) ([]p
 	return searchResults, nil
 }
 
-func (ss *chapterStorage) ChaptersWithOffset(ctx context.Context, searchQuery string, params ...string) ([]pb.SearchResponse, error) {
-	sql := `SELECT c.id, c.name, r.name, c.updated_at, count(*) OVER() AS full_count from chapter AS c INNER JOIN doc as r ON c.r_id = r.id WHERE c.ts @@ phraseto_tsquery('russian',$1)`
+func (ss *chapterStorage) ChaptersWithOffset(ctx context.Context, searchQuery string, offset, limit uint32) ([]*pb.SearchResponse, error) {
+	sql := `SELECT c.id, c.name, d.name, c.updated_at, count(*) OVER() AS full_count from chapter AS c INNER JOIN doc as d ON c.r_id = d.id WHERE c.ts @@ phraseto_tsquery('russian',$1)`
 	// Pagination
-	if len(params) == 2 {
-		// sql += fmt.Sprintf(` AND (c.updated_at, c.id) > ('%s' :: TIMESTAMPTZ, '%s') ORDER BY c.updated_at, c.id LIMIT %s`, params[0], params[1], params[2])
-		sql += fmt.Sprintf(` OFFSET %s LIMIT %s`, params[0], params[1])
-	}
+	// sql += fmt.Sprintf(` AND (c.updated_at, c.id) > ('%s' :: TIMESTAMPTZ, '%s') ORDER BY c.updated_at, c.id LIMIT %s`, params[0], params[1], params[2])
+	sql += fmt.Sprintf(` OFFSET %d LIMIT %d`, offset, limit)
+
 	// else if len(params) == 1 { // First page
 	// 	sql += fmt.Sprintf(` LIMIT %s`, params[0])
 	// }
-	var searchResults []pb.SearchResponse
+	var searchResults []*pb.SearchResponse
 	rows, err := ss.client.Query(ctx, sql, searchQuery)
 	if err != nil {
 		return nil, err
@@ -59,7 +58,7 @@ func (ss *chapterStorage) ChaptersWithOffset(ctx context.Context, searchQuery st
 	defer rows.Close()
 
 	for rows.Next() {
-		search := pb.SearchResponse{}
+		search := &pb.SearchResponse{}
 		if err = rows.Scan(
 			&search.ChapterID, &search.Text, &search.DocName, &search.UpdatedAt, &search.Count,
 		); err != nil {
