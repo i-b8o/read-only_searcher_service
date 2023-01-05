@@ -40,7 +40,7 @@ func NewApp(ctx context.Context, config *config.Config) (App, error) {
 	docAdapter := postgressql.NewDocStorage(pgClient)
 	chapterAdapter := postgressql.NewChapterStorage(pgClient)
 	paragraphAdapter := postgressql.NewParagraphStorage(pgClient)
-	generalAdapter := postgressql.NewParagraphStorage(pgClient)
+	generalAdapter := postgressql.NewGeneralStorage(pgClient)
 
 	docService := service.NewDocService(docAdapter)
 	chapterService := service.NewChapterService(chapterAdapter)

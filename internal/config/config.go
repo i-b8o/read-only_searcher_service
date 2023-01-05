@@ -37,7 +37,7 @@ var once sync.Once
 
 func GetConfig() *Config {
 	once.Do(func() {
-		flag.StringVar(&configPath, FlagConfigPathName, "configs/config.local.yaml", "this is app config file")
+		flag.StringVar(&configPath, FlagConfigPathName, ".configs/config.local.yaml", "this is app config file")
 		flag.Parse()
 
 		log.Print("config init")
