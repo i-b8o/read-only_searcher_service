@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	"github.com/i-b8o/logging"
 	pb "github.com/i-b8o/read-only_contracts/pb/searcher/v1"
 )
 
@@ -13,10 +14,11 @@ type ParagraphStorage interface {
 
 type paragraphsService struct {
 	storage ParagraphStorage
+	logger  logging.Logger
 }
 
-func NewParagraphsService(storage ParagraphStorage) *paragraphsService {
-	return &paragraphsService{storage: storage}
+func NewParagraphsService(storage ParagraphStorage, logger logging.Logger) *paragraphsService {
+	return &paragraphsService{storage: storage, logger: logger}
 }
 
 func (s paragraphsService) Search(ctx context.Context, searchQuery string, params ...uint32) ([]*pb.SearchResponse, error) {

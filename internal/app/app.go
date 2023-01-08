@@ -37,15 +37,15 @@ func NewApp(ctx context.Context, config *config.Config) (App, error) {
 	if err != nil {
 		logger.Fatal(err)
 	}
-	docAdapter := postgressql.NewDocStorage(pgClient)
-	chapterAdapter := postgressql.NewChapterStorage(pgClient)
-	paragraphAdapter := postgressql.NewParagraphStorage(pgClient)
-	generalAdapter := postgressql.NewGeneralStorage(pgClient)
+	// docAdapter := postgressql.NewDocStorage(pgClient)
+	// chapterAdapter := postgressql.NewChapterStorage(pgClient)
+	// paragraphAdapter := postgressql.NewParagraphStorage(pgClient)
+	adapter := postgressql.NewSearchStorage(pgClient)
 
-	docService := service.NewDocService(docAdapter)
-	chapterService := service.NewChapterService(chapterAdapter)
-	paragraphService := service.NewParagraphsService(paragraphAdapter)
-	generalService := service.NewGeneralService(generalAdapter)
+	docService := service.NewDocService(adapter, logger)
+	chapterService := service.NewChapterService(adapter, logger)
+	paragraphService := service.NewParagraphsService(adapter, logger)
+	generalService := service.NewGeneralService(adapter, logger)
 
 	controller := controller.NewDocGRPCService(docService, chapterService, paragraphService, generalService)
 	// read ca's cert, verify to client's certificate

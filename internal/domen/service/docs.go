@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	"github.com/i-b8o/logging"
 	pb "github.com/i-b8o/read-only_contracts/pb/searcher/v1"
 )
 
@@ -13,10 +14,11 @@ type DocStorage interface {
 
 type docService struct {
 	storage DocStorage
+	logger  logging.Logger
 }
 
-func NewDocService(storage DocStorage) *docService {
-	return &docService{storage: storage}
+func NewDocService(storage DocStorage, logger logging.Logger) *docService {
+	return &docService{storage: storage, logger: logger}
 }
 
 func (s docService) Search(ctx context.Context, searchQuery string, params ...uint32) ([]*pb.SearchResponse, error) {

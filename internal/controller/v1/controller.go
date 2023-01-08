@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 
 	pb "github.com/i-b8o/read-only_contracts/pb/searcher/v1"
 )
@@ -27,27 +28,27 @@ func NewDocGRPCService(docService, chapterService, paragraphService, generalServ
 	}
 }
 
-func (s *DocGRPCService) Docs(ctx context.Context, req *pb.SearchRequest) (*pb.SearchResponseMessage, error) {
-	return s.search(ctx, req, s.docService)
-}
+func (s *DocGRPCService) Search(ctx context.Context, req *pb.SearchRequest) (*pb.SearchResponseMessage, error) {
 
-func (s *DocGRPCService) Chapters(ctx context.Context, req *pb.SearchRequest) (*pb.SearchResponseMessage, error) {
-	return s.search(ctx, req, s.paragraphService)
-}
-
-func (s *DocGRPCService) Pargaraphs(ctx context.Context, req *pb.SearchRequest) (*pb.SearchResponseMessage, error) {
-	return s.search(ctx, req, s.paragraphService)
-}
-
-func (s *DocGRPCService) General(ctx context.Context, req *pb.SearchRequest) (*pb.SearchResponseMessage, error) {
-	return s.search(ctx, req, s.generalService)
+	switch subj := req.GetSubject(); subj {
+	case pb.SearchRequest_Docs:
+		return s.search(ctx, req, s.docService)
+	case pb.SearchRequest_Chapters:
+		return s.search(ctx, req, s.chapterService)
+	case pb.SearchRequest_Pargaraphs:
+		return s.search(ctx, req, s.paragraphService)
+	case pb.SearchRequest_General:
+		return s.search(ctx, req, s.generalService)
+	default:
+		return nil, fmt.Errorf("wrong subject")
+	}
 }
 
 func (s *DocGRPCService) search(ctx context.Context, req *pb.SearchRequest, searchservice SearchService) (*pb.SearchResponseMessage, error) {
-	ofset := req.GetOffset()
+	offset := req.GetOffset()
 	limit := req.GetLimit()
 	query := req.GetSearchQuery()
-	r, err := searchservice.Search(ctx, query, ofset, limit)
+	r, err := searchservice.Search(ctx, query, offset, limit)
 	if err != nil {
 		return nil, err
 	}

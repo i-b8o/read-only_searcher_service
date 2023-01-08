@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	"github.com/i-b8o/logging"
 	pb "github.com/i-b8o/read-only_contracts/pb/searcher/v1"
 )
 
@@ -13,10 +14,11 @@ type ChapterStorage interface {
 
 type chapterService struct {
 	storage ChapterStorage
+	logger  logging.Logger
 }
 
-func NewChapterService(storage ChapterStorage) *chapterService {
-	return &chapterService{storage: storage}
+func NewChapterService(storage ChapterStorage, logger logging.Logger) *chapterService {
+	return &chapterService{storage: storage, logger: logger}
 }
 
 func (s chapterService) Search(ctx context.Context, searchQuery string, params ...uint32) ([]*pb.SearchResponse, error) {

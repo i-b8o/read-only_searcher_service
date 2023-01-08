@@ -46,3 +46,9 @@ FROM paragraph AS p
     INNER JOIN chapter AS c ON p.c_id = c.id
     INNER JOIN doc AS d ON c.doc_id = d.id;
 create index idx_search on doc_search using GIN(ts);
+
+GRANT CONNECT ON DATABASE search TO reader;
+GRANT SELECT ON TABLE public.doc TO reader;
+GRANT SELECT ON TABLE public.chapter TO reader;
+GRANT SELECT ON TABLE public.paragraph TO reader;
+GRANT SELECT ON public.doc_search TO reader;
