@@ -26,7 +26,7 @@ func (ss *searchStorage) search(ctx context.Context, searchQuery, sql string) ([
 	fmt.Println(sql)
 	var searchResults []*pb.SearchResponse
 
-	rows, err := ss.client.Query(ctx, sql, searchQuery)
+	rows, err := ss.client.Query(ctx, sql, searchQuery, sql)
 	if err != nil {
 		return nil, err
 	}
@@ -35,6 +35,7 @@ func (ss *searchStorage) search(ctx context.Context, searchQuery, sql string) ([
 
 	for rows.Next() {
 		search := entity.Search{}
+		fmt.Println(searchQuery, search.DocID, search.DocName, search.CID, search.CName)
 		if err = rows.Scan(
 			&search.DocID, &search.DocName, &search.CID, &search.CName, &search.PID, &search.Text, &search.Count,
 		); err != nil {
